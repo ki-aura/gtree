@@ -231,11 +231,13 @@ int main(int argc, char *argv[]) {
 
     // If help requested or invalid file index, show help and exit
     if (opts.show_help || first_file_index == -1 || first_file_index < argc - 1) {
-        printf("%d %d\n", first_file_index, argc);
         show_help();
         return EXIT_SUCCESS;
     }
 
+	// show version (helps with debugs!)
+	fprintf(stderr, "GTree Version %s\n", GTREE_VERSION);
+	
     // Initialize all counters to 0
     ActivityReport final_report = {0};
 
@@ -277,9 +279,14 @@ int main(int argc, char *argv[]) {
 
             // Read each entry in the directory
             while ((entry = readdir(frame->dir)) != NULL) {
+                // skip any directory starting with a . unless we're showing hidden directores
+                if(!opts.show_hidden && entry->d_name[0] == '.')
+                	continue;
+
+            	// always skip . and .. directories 
                 if (!strcmp(entry->d_name, ".") || !strcmp(entry->d_name, ".."))
                     continue;
-
+                
                 // Build full path
                 if (snprintf(buf, PATH_MAX, "%s/%s", frame->path, entry->d_name) >= PATH_MAX)
                     continue;

@@ -22,17 +22,18 @@ typedef struct {
 
 // Table for help messages for options
 HelpDef help_table[] = {
-    {"-h",   "Display this help message"},
+    {"-h",   "Display this Help message"},
 	{"-s",   "Show File & Size totals for populated directories"},
-	{"-l",   "Follow Sym-Link directories (disables loop-detection if not specified)"},
-	{"-f",   "Show Individual Files"},	
-	{"-c",   "Show Files in colour (automatically sets -f)"},	
-    {"-d N", "Maximum depth (will always run to a minimum of 2)"},
+	{"-l",   "Follow sym-Link directories (loop-detection is always enabled)"},
+	{"-j",   "Show directories that start with a ."},	
+	{"-f",   "Show individual Files"},	
+	{"-c",   "Show iles in Colour (automatically sets -f)"},	
+    {"-d N", "Maximum Depth (will always run to a minimum of 2)"},
     {NULL, NULL} // sentinel: marks the end of the array
 };
 
 // List of supported options for getopt(). 'd:' means -d requires an argument.
-const char option_list[] = "hslfcd:";
+const char option_list[] = "hsljfcd:";
 
 // Parses command line arguments using POSIX getopt() and sets the Options struct.
 void parse_options(int argc, char *argv[], Options *opts, int default_depth, int *first_file_index) {
@@ -45,6 +46,7 @@ void parse_options(int argc, char *argv[], Options *opts, int default_depth, int
             case 'h': opts->show_help = true; break;
             case 's': opts->show_file_stats = true; break;
             case 'l': opts->follow_links = true; break;
+            case 'j': opts->show_hidden = true; break;
             case 'f': opts->show_files = true; break;
             case 'c': opts->colour_files = true; opts->show_files = true; break;
             case 'd': {
