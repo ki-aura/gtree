@@ -238,6 +238,14 @@ int main(int argc, char *argv[]) {
 	// show version (helps with debugs!)
 	fprintf(stderr, "GTree Version %s\n", GTREE_VERSION);
 	
+	// check directory is valid
+	DIR *valid_start = opendir(argv[first_file_index]);
+	if(valid_start == NULL){
+		fprintf(stderr, "Invalid starting directory specified\n");
+		return EXIT_FAILURE;
+	}
+	closedir(valid_start);
+	
     // Initialize all counters to 0
     ActivityReport final_report = {0};
 
@@ -298,11 +306,6 @@ int main(int argc, char *argv[]) {
                 HandleFiles(buf, frame, &st, &lst, &final_report, opts.show_files);
 
                 bool is_symdir = S_ISLNK(lst.st_mode) && S_ISDIR(st.st_mode);
-
-                // Check if directory already visited
-                bool already_visited = false;
-                if ((S_ISDIR(st.st_mode) || is_symdir) && stat(buf, &st) == 0)
-                    already_visited = visited_before(st.st_dev, st.st_ino);
 
                 // Add subdirectory to list (regardless of if visited - this is checked in phase 2)
                 if (S_ISDIR(st.st_mode) || is_symdir)
@@ -419,7 +422,8 @@ int main(int argc, char *argv[]) {
     human_size(final_report.TOTAL_file_size, hsize, sizeof(hsize));
     printf("\nTotal Number of Directories traversed %zu (of which %zu are linked)\n"
            "Maximum depth descended: %d\n", 
-           final_report.TOTAL_directories, final_report.TOTAL_linked_directories, final_report.TOTAL_depth);
+           final_report.TOTAL_directories, final_report.TOTAL_linked_directories, 
+           final_report.TOTAL_depth + 1); // +1 because the depth starts at 0
 
     if (opts.show_file_stats || opts.show_files)
         printf("Total Number of Files: %zu (of which %zu are linked)\n"

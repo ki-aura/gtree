@@ -27,8 +27,8 @@ HelpDef help_table[] = {
 	{"-l",   "Follow sym-Link directories (loop-detection is always enabled)"},
 	{"-j",   "Show directories that start with a ."},	
 	{"-f",   "Show individual Files"},	
-	{"-c",   "Show iles in Colour (automatically sets -f)"},	
-    {"-d N", "Maximum Depth (will always run to a minimum of 2)"},
+	{"-c",   "Show files in Colour (automatically sets -f)"},	
+    {"-d N", "Set maximum Depth to descend (will always run to a minimum of 1)"},
     {NULL, NULL} // sentinel: marks the end of the array
 };
 
@@ -51,7 +51,7 @@ void parse_options(int argc, char *argv[], Options *opts, int default_depth, int
             case 'c': opts->colour_files = true; opts->show_files = true; break;
             case 'd': {
                 int n = atoi(optarg);        // optarg holds the argument for the current option (-d N)
-                if (n < 2) n = 2;            // Enforce minimum depth
+                if (n < 1) n = 1;            // Enforce minimum depth
                 if (n > default_depth) n = default_depth; // Prevent array overflow/extreme depth
                 opts->max_depth = n;
                 break;
