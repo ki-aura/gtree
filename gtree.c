@@ -230,7 +230,7 @@ int main(int argc, char *argv[]) {
     parse_options(argc, argv, &opts, MAX_DEPTH, &first_file_index);
 
     // If help requested or invalid file index, show help and exit
-    if (opts.show_help || first_file_index == -1 || first_file_index < argc - 1) {
+    if (opts.show_help || first_file_index < argc - 1) {
         show_help();
         return EXIT_SUCCESS;
     }

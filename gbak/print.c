@@ -41,7 +41,7 @@ static void print_directory_content(const char *name, bool is_symdir,
 {
     if (is_symdir) {
         printf("@%s -> %s%s\n", name, symPath,
-               is_recursive ? " [recursive - not followed]" : "");
+               is_recursive ? " [recursive]" : "");
         return;
     }
 
@@ -49,10 +49,10 @@ static void print_directory_content(const char *name, bool is_symdir,
         char hsize[32];
         human_size(fs, hsize, sizeof(hsize));
         printf("%s [Files: %zu] [Size: %s]%s\n", name, fc, hsize,
-               is_recursive ? " [recursive - not followed]" : "");
+               is_recursive ? " [recursive]" : "");
     } else {
         printf("%s%s\n", name,
-               is_recursive ? " [recursive - not followed]" : "");
+               is_recursive ? " [recursive]" : "");
     }
 }
 

@@ -230,12 +230,22 @@ int main(int argc, char *argv[]) {
     parse_options(argc, argv, &opts, MAX_DEPTH, &first_file_index);
 
     // If help requested or invalid file index, show help and exit
-    if (opts.show_help || first_file_index == -1 || first_file_index < argc - 1) {
-        printf("%d %d\n", first_file_index, argc);
+    if (opts.show_help || first_file_index < argc - 1) {
         show_help();
         return EXIT_SUCCESS;
     }
 
+	// show version (helps with debugs!)
+	fprintf(stderr, "GTree Version %s\n", GTREE_VERSION);
+	
+	// check directory is valid
+	DIR *valid_start = opendir(argv[first_file_index]);
+	if(valid_start == NULL){
+		fprintf(stderr, "Invalid starting directory specified\n");
+		return EXIT_FAILURE;
+	}
+	closedir(valid_start);
+	
     // Initialize all counters to 0
     ActivityReport final_report = {0};
 
@@ -277,9 +287,14 @@ int main(int argc, char *argv[]) {
 
             // Read each entry in the directory
             while ((entry = readdir(frame->dir)) != NULL) {
+                // skip any directory starting with a . unless we're showing hidden directores
+                if(!opts.show_hidden && entry->d_name[0] == '.')
+                	continue;
+
+            	// always skip . and .. directories 
                 if (!strcmp(entry->d_name, ".") || !strcmp(entry->d_name, ".."))
                     continue;
-
+                
                 // Build full path
                 if (snprintf(buf, PATH_MAX, "%s/%s", frame->path, entry->d_name) >= PATH_MAX)
                     continue;
@@ -291,11 +306,6 @@ int main(int argc, char *argv[]) {
                 HandleFiles(buf, frame, &st, &lst, &final_report, opts.show_files);
 
                 bool is_symdir = S_ISLNK(lst.st_mode) && S_ISDIR(st.st_mode);
-
-                // Check if directory already visited
-                bool already_visited = false;
-                if ((S_ISDIR(st.st_mode) || is_symdir) && stat(buf, &st) == 0)
-                    already_visited = visited_before(st.st_dev, st.st_ino);
 
                 // Add subdirectory to list (regardless of if visited - this is checked in phase 2)
                 if (S_ISDIR(st.st_mode) || is_symdir)
@@ -412,7 +422,8 @@ int main(int argc, char *argv[]) {
     human_size(final_report.TOTAL_file_size, hsize, sizeof(hsize));
     printf("\nTotal Number of Directories traversed %zu (of which %zu are linked)\n"
            "Maximum depth descended: %d\n", 
-           final_report.TOTAL_directories, final_report.TOTAL_linked_directories, final_report.TOTAL_depth);
+           final_report.TOTAL_directories, final_report.TOTAL_linked_directories, 
+           final_report.TOTAL_depth + 1); // +1 because the depth starts at 0
 
     if (opts.show_file_stats || opts.show_files)
         printf("Total Number of Files: %zu (of which %zu are linked)\n"

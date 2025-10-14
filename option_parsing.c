@@ -25,7 +25,7 @@ HelpDef help_table[] = {
     {"-h",   "Display this Help message"},
 	{"-s",   "Show File & Size totals for populated directories"},
 	{"-l",   "Follow sym-Link directories (loop-detection is always enabled)"},
-	{"-j",   "Show directories that start with a ."},	
+	{"-j",   "Show directories & files that start with a ."},	
 	{"-f",   "Show individual Files"},	
 	{"-c",   "Show files in Colour (automatically sets -f)"},	
     {"-d N", "Set maximum Depth to descend (will always run to a minimum of 1)"},
@@ -74,5 +74,5 @@ void show_help(void){
 	for (HelpDef *opt = help_table; opt->name; opt++) {
 		fprintf(stderr, "  %s\t%s\n", opt->name, opt->help);
 	}
-	fprintf(stderr, "Version %s\n", GTREE_VERSION);
+	fprintf(stderr, "Version ki-aura %s\n", GTREE_VERSION);
 }
