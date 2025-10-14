@@ -74,5 +74,5 @@ void show_help(void){
 	for (HelpDef *opt = help_table; opt->name; opt++) {
 		fprintf(stderr, "  %s\t%s\n", opt->name, opt->help);
 	}
-	fprintf(stderr, "Version ki-aura %s\n", GTREE_VERSION);
+	fprintf(stderr, "GTree Version: ki-aura %s\n", GTREE_VERSION);
 }

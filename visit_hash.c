@@ -25,17 +25,15 @@ static inline int dev_ino_equal(VisitedHash a, VisitedHash b) {
 }
 
 static inline khint_t dev_ino_hash(VisitedHash k) {
-    // A. Combine dev_t and ino_t into a 64-bit value (as a unique identifier).
-    // The FNV-1a approach from before is one of the safest for this combination.
-    // FNV_PRIME = 1099511621165ULL, FNV_OFFSET = 14695981039346656037ULL
-    // For simplicity, let's use the standard multiplication/XOR combination first.
 
     uint64_t udev = (uint64_t)k.st_dev;
     uint64_t uino = (uint64_t)k.st_ino;
 
-    // Use a multiplier to ensure a better distribution of the dev field.
+    // Use a multiplier to ensure a better distribution of the dev field. this uses the
+    // “Knuth multiplicative constant” (≈ 2^<bits> × (√5 – 1)/2) (which is the golden ratio)
+    // so for 32 bit keys this would be 2654435761u and for 64 bits it's 11400714819323198485ull
     // This creates a 64-bit combined value.
-    uint64_t combined_64 = (udev * 2654435761ULL) ^ uino;
+    uint64_t combined_64 = (udev * 11400714819323198485ULL) ^ uino;
 
     // B. Fold the 64-bit value down to the required 32-bit khint_t.
     // This is crucial to avoid losing information.

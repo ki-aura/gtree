@@ -236,7 +236,7 @@ int main(int argc, char *argv[]) {
     }
 
 	// show version (helps with debugs!)
-	fprintf(stderr, "GTree Version %s\n", GTREE_VERSION);
+	printf("GTree Version: ki-aura %s\n\n", GTREE_VERSION);
 	
 	// check directory is valid
 	DIR *valid_start = opendir(argv[first_file_index]);
@@ -262,13 +262,11 @@ int main(int argc, char *argv[]) {
     // Record root directory's unique device/inode ID
     struct stat st_root;
 	if (stat(root->path, &st_root) == 0) {
-		if (add_visited(st_root.st_dev, st_root.st_ino))
-			final_report.TOTAL_directories++;
+		add_visited(st_root.st_dev, st_root.st_ino);
 	}
 
     // Push root frame onto stack
     stack[sp++] = root;
-	track_max_depth(&final_report, root->depth);
 
     // ------------------ Main traversal loop ------------------
     // Loop continues while there are frames (directories) on the stack
@@ -320,7 +318,7 @@ int main(int argc, char *argv[]) {
             print_entry_line(frame, frame->is_last,
                              false, NULL,
                              false, opts.show_file_stats, NULL, true, opts.colour_files);
-
+			
             // Print files if requested
             if (opts.show_files) {
                 SubDirFile *cur = frame->subfiles, *prev;
@@ -402,6 +400,10 @@ int main(int argc, char *argv[]) {
 			
 					print_entry_line(&temp, is_last_child, false, cur->path,
 									 already_visited, opts.show_file_stats, NULL, true, opts.colour_files);
+					if (add_visited(st_target.st_dev, st_target.st_ino)) {
+						final_report.TOTAL_directories++;
+					}
+					track_max_depth(&final_report, frame->depth + 1);
 				}
 			}
 
@@ -420,10 +422,10 @@ int main(int argc, char *argv[]) {
     // ----------------- Print summary -----------------
     char hsize[32];
     human_size(final_report.TOTAL_file_size, hsize, sizeof(hsize));
-    printf("\nTotal Number of Directories traversed %zu (of which %zu are linked)\n"
+    printf("\nTotal Number of Directories traversed %zu (containing %zu links)\n"
            "Maximum depth descended: %d\n", 
            final_report.TOTAL_directories, final_report.TOTAL_linked_directories, 
-           final_report.TOTAL_depth + 1); // +1 because the depth starts at 0
+           final_report.TOTAL_depth);
 
     if (opts.show_file_stats || opts.show_files)
         printf("Total Number of Files: %zu (of which %zu are linked)\n"
