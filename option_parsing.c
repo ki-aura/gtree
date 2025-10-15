@@ -27,13 +27,14 @@ HelpDef help_table[] = {
 	{"-l",   "Follow sym-Link directories (loop-detection is always enabled)"},
 	{"-j",   "Show directories & files that start with a ."},	
 	{"-f",   "Show individual Files"},	
+	{"-C",   "Show sym-links in Colour"},	
 	{"-c",   "Show files in Colour (automatically sets -f)"},	
     {"-d N", "Set maximum Depth to descend (will always run to a minimum of 1)"},
     {NULL, NULL} // sentinel: marks the end of the array
 };
 
 // List of supported options for getopt(). 'd:' means -d requires an argument.
-const char option_list[] = "hsljfcd:";
+const char option_list[] = "hsljfCcd:";
 
 // Parses command line arguments using POSIX getopt() and sets the Options struct.
 void parse_options(int argc, char *argv[], Options *opts, int default_depth, int *first_file_index) {
@@ -48,6 +49,7 @@ void parse_options(int argc, char *argv[], Options *opts, int default_depth, int
             case 'l': opts->follow_links = true; break;
             case 'j': opts->show_hidden = true; break;
             case 'f': opts->show_files = true; break;
+            case 'C': opts->colour_links = true; break;
             case 'c': opts->colour_files = true; opts->show_files = true; break;
             case 'd': {
                 int n = atoi(optarg);        // optarg holds the argument for the current option (-d N)

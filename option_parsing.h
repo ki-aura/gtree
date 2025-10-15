@@ -10,6 +10,7 @@ typedef struct {
     bool follow_links;		// -l
     bool show_hidden;		// -j
     bool show_files;		// -f
+    bool colour_links;		// -C
     bool colour_files;		// -c
     int max_depth;   		// -dN
 } Options;

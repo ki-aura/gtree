@@ -10,6 +10,7 @@
 #include "gtree.h"
 #include "memsafe.h"
 #include "print.h"
+#include "option_parsing.h"
 
 
 // ----------------- Human readable file size -------------------
@@ -36,16 +37,22 @@ static void print_tree_prefix(const DirFrame *frame)
 }
 
 static void print_directory_content(const char *name, bool is_symdir,
-                                    const char *symPath, bool is_recursive,
-                                    bool show_stats, size_t fc, off_t fs)
+                            const char *symPath, bool is_recursive,
+                            size_t fc, off_t fs, Options *opts)
 {
     if (is_symdir) {
-        printf("@%s -> %s%s\n", name, symPath,
-               is_recursive ? " [recursive]" : "");
+        const char *TCOL  = "\033[1;32m";  // ANSI 33m cyan; 34 blue, 31 red, 32 green, 36 cyan
+	    const char *RESET = "\033[0m";   // reset to default color
+
+        printf("%s@%s -> %s%s%s\n", 
+        		opts->colour_links ? TCOL : "", 
+        		name, symPath,
+        		opts->colour_links ? RESET : "", 
+               	is_recursive ? " [recursive]" : "");
         return;
     }
 
-    if (show_stats && fc > 0) {
+    if (opts->show_file_stats && fc > 0) {
         char hsize[32];
         human_size(fs, hsize, sizeof(hsize));
         printf("%s [Files: %zu] [Size: %s]%s\n", name, fc, hsize,
@@ -62,8 +69,8 @@ static void print_directory_content(const char *name, bool is_symdir,
 // is_dir: true => print directory (connector + stats/symlink handling)
 //         false => print file (no connector, prints "    : filename" style as original)
 void print_entry_line(const DirFrame *frame, bool is_last, bool is_symdir, 
-					  const char *symPath, bool is_recursive, bool show_stats, 
-					  const char *entry_name, bool is_dir, bool colour_files) {
+					  const char *symPath, bool is_recursive, 
+					  const char *entry_name, bool is_dir, Options *opts) {
 					   
     const char *basePath = frame ? frame->path : "";
     int depth = frame ? frame->depth : 0;
@@ -81,14 +88,15 @@ void print_entry_line(const DirFrame *frame, bool is_last, bool is_symdir,
     // --- FILE case: keep the original "    : name" behaviour (no connector) ---
     if (!is_dir) {
         // preserve original formatting: depth==0 ? "" : "    "
-        const char *TCOL  = "\033[36m";  // ANSI 33m cyan; 34 blue, 31 red, 32 green, 36 cyan
+        const char *TCOL1 = "\033[0;36m";  // ANSI 33m cyan; 34 blue, 31 red, 32 green, 36 cyan
+        const char *TCOL2 = "\033[1;33m";  // ANSI 33m 33 yellow 0/1 = normal or bold
 	    const char *RESET = "\033[0m";   // reset to default color
 
         printf("%s: " "%s%s%s\n",
         		depth == 0 ? "" : (is_last ? "    " : "│   "), 
-        		colour_files ? TCOL : "", 
+        		opts->colour_files ? ((is_symdir && opts->colour_links) ? TCOL2 : TCOL1) : "", 
         		entry_name ? entry_name : "", 
-        		colour_files ? RESET : "");
+        		opts->colour_files ? RESET : "");
         return;
     }
 
@@ -97,7 +105,7 @@ void print_entry_line(const DirFrame *frame, bool is_last, bool is_symdir,
         printf("%s── ", is_last ? "└" : "├");
 
     // Use dir_name as the printed name for directories
-    print_directory_content(dir_name, is_symdir, symPath, is_recursive, show_stats, fc, fs);
+    print_directory_content(dir_name, is_symdir, symPath, is_recursive, fc, fs, opts);
 }
 
 // ----------------- File Handling -------------------
