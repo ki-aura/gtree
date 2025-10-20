@@ -23,6 +23,7 @@ typedef struct {
 // Table for help messages for options
 HelpDef help_table[] = {
     {"-h",   "Display this Help message"},
+    {"-v",   "Display GTree Version"},
 	{"-s",   "Show File & Size totals for populated directories"},
 	{"-l",   "Follow sym-Link directories (loop-detection is always enabled)"},
 	{"-j",   "Show directories & files that start with a ."},	
@@ -34,7 +35,7 @@ HelpDef help_table[] = {
 };
 
 // List of supported options for getopt(). 'd:' means -d requires an argument.
-const char option_list[] = "hsljfCcd:";
+const char option_list[] = "hvsljfCcd:";
 
 // Parses command line arguments using POSIX getopt() and sets the Options struct.
 void parse_options(int argc, char *argv[], Options *opts, int default_depth, int *first_file_index) {
@@ -45,6 +46,7 @@ void parse_options(int argc, char *argv[], Options *opts, int default_depth, int
     while ((opt = getopt(argc, argv, option_list)) != -1) { 
         switch (opt) {
             case 'h': opts->show_help = true; break;
+            case 'v': opts->show_version = true; break;
             case 's': opts->show_file_stats = true; break;
             case 'l': opts->follow_links = true; break;
             case 'j': opts->show_hidden = true; break;
@@ -70,11 +72,16 @@ void parse_options(int argc, char *argv[], Options *opts, int default_depth, int
 }
 
 // Print help message using the help_table
+void show_version(void){
+	fprintf(stderr, "GTree Version: ki-aura %s\n", GTREE_VERSION);
+}
+
+// Print help message using the help_table
 void show_help(void){
 	fprintf(stderr, "Usage: fs [options] starting_directory \n");
 	fprintf(stderr, "Options:\n");
 	for (HelpDef *opt = help_table; opt->name; opt++) {
 		fprintf(stderr, "  %s\t%s\n", opt->name, opt->help);
 	}
-	fprintf(stderr, "GTree Version: ki-aura %s\n", GTREE_VERSION);
+	show_version();
 }

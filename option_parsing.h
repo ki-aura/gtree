@@ -6,6 +6,7 @@
 // Structure to hold all parsed command-line options
 typedef struct {
     bool show_help;			// -h
+    bool show_version;		// -v
     bool show_file_stats;	// -s
     bool follow_links;		// -l
     bool show_hidden;		// -j
@@ -17,5 +18,6 @@ typedef struct {
 
 void parse_options(int argc, char *argv[], Options *opts, int default_depth, int *first_file_index);
 void show_help(void);
+void show_version(void);
 
 #endif  

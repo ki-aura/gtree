@@ -3,21 +3,20 @@ From Project Folder
 git tag --list
 grep  "GTREE_VERSION" gtree.h
 git add .
-git commit -m "ready for v2.3.0"
+git commit -m "ready for v2.3.2"
 git push
-git tag -a v2.3.0 -m "Release v2.3.0"
-git push origin v2.3.0
-gh release create v2.3.0 --title "Release v2.3.0" --notes "Release v2.3.0 notes..."
-
-From Homebrew Folder
-====================
+git tag -a v2.3.2 -m "Release v2.3.2"
+git push origin v2.3.2
+gh release create v2.3.2 --title "Release v2.3.2" --notes "Release v2.3.2 notes..."
 cd /opt/homebrew/Library/Taps/ki-aura/homebrew-gtree
-curl -L -o v2.3.0.tar.gz https://github.com/ki-aura/gtree/archive/refs/tags/v2.3.0.tar.gz
-shasum -a 256 v2.3.0.tar.gz
+curl -L -o v2.3.2.tar.gz https://github.com/ki-aura/gtree/archive/refs/tags/v2.3.2.tar.gz
+shasum -a 256 v2.3.2.tar.gz
 rm *.gz
+
 nano Formula/gtree.rb
+
 git add Formula/gtree.rb
-git commit -m "ready for v2.3.0"
+git commit -m "ready for v2.3.2"
 git push
 
 Test

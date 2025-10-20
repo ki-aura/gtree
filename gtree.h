@@ -10,7 +10,7 @@
 #define PATH_MAX 1024   
 #endif
 
-#define GTREE_VERSION "2.3.0"
+#define GTREE_VERSION "2.3.2"
 
 // -----------------------------------------------------
 // ------------------ Definitions ------------------
@@ -66,3 +66,131 @@ typedef struct ActivityReport {
 
 
 #endif
+
+/*
+================================================================================
+gtree Traversal Logic (Explicit Stack Version)
+================================================================================
+This diagram explains how the gtree program simulates recursive directory 
+traversal using an explicit stack of DirFrame pointers
+
+Legend:
+  [DirFrame]   : Represents a directory currently being traversed.
+  stack[sp]    : Explicit stack holding DirFrame pointers.
+  subdirs      : Linked list of subdirectories inside current directory.
+  current      : Pointer to the next subdirectory to process in subdirs.
+  sp           : Stack pointer; points to the next free slot in the stack.
+  is_symlink   : Indicates whether a directory entry is a symlink.
+  ancestor_siblings[] : Array used for drawing tree structure correctly.
+
+================================================================================
+Notes for Understanding:
+- The explicit stack simulates the call stack used in a recursive implementation.
+- Phase 1 = "Scan": build the list of subdirectories to traverse.
+- Phase 2 = "Process": traverse subdirectories using the stack.
+- This approach avoids actual recursion, giving better control over stack size.
+- Symlink handling and visited hash prevent infinite loops caused by recursive links.
+- ancestor_siblings[] ensures proper tree drawing even with deep nested directories.
+
+================================================================================
+High-level Algorithm:
+
+1. Initialize
+   - Parse command line options.
+   - Create a hash table for visited directories to avoid infinite loops via symlinks.
+   - Create root DirFrame for starting directory.
+   - Push root onto stack.
+   - Initialize ActivityReport counters.
+
+2. Main Traversal Loop (while sp > 0)
+   a) Peek at top frame on stack:
+        DirFrame *frame = stack[sp - 1];
+
+- We are "peeking" at the top of the stack to see which directory we should process 
+	next without removing it yet.
+- The stack contains DirFrame* pointers, with the next free slot always indicated by sp.
+- sp is the index of the next available slot, not the current top element. Therefore, 
+	the current top frame is at sp - 1.
+- Peeking allows us to examine the current directory (its entries, subdirectories, and 
+	files) while still keeping it on the stack. We only pop it after all its subdirectories 
+	have been fully processed.
+- This is essential for simulating recursion explicitly: in a normal recursive call, the 
+	function’s local variables remain on the call stack until the function returns. Here, 
+	the stack array and DirFrame pointers play the same role.
+        
+
+   b) Phase 1: Scan Current Directory (only if subdirs == NULL)
+        - Read entries with readdir().
+        - Skip "." and "..".
+        - Build full path for each entry.
+        - lstat() for symlink info, stat() for actual file type.
+        - Handle files (update file count/size, print if requested).
+        - For directories or symlinked directories:
+            * Check if already visited (loop prevention).
+            * If not visited, create SubDirNode and append to subdirs list.
+        - Set frame->subdirs = head of SubDirNode list.
+        - Set frame->current = head.
+        - Print current directory line.
+        - Print files if requested.
+
+   c) Phase 2: Process Next Subdirectory
+        - If frame->current != NULL:
+            * Take current SubDirNode.
+            * Advance frame->current to next node.
+            * Determine if this is the last child.
+            * Update ancestor_siblings[] for correct tree drawing.
+            * Perform stat() to get directory info.
+            * If symlink:
+                - Print entry line with target path.
+                - Traverse if not already visited and follow_links enabled:
+                    + Create new DirFrame for child directory.
+                    + Push onto stack.
+                    + Increment TOTAL_directories.
+                    + Track max depth.
+                - Increment TOTAL_linked_directories.
+            * If normal directory and not visited:
+                - Create DirFrame.
+                - Push onto stack.
+                - Increment TOTAL_directories.
+                - Track max depth.
+        - Else (frame->current == NULL):
+            * Directory fully processed.
+            * Pop frame from stack.
+            * Close directory and free memory (subdirs list + frame).
+
+3. Loop ends when stack is empty.
+4. Cleanup:
+    - Free visited node hash table.
+5. Print summary statistics:
+    - Total directories, linked directories, files, total file size, max depth.
+
+================================================================================
+Example Stack Visualization (simplified):
+================================================================================
+
+Initial:
+sp = 0
+stack = []
+
+Push root:
+sp = 1
+stack = [ root ]
+
+Phase 1: scan root
+  stack[0].subdirs = [subdir1, subdir2]
+  stack[0].current = subdir1
+
+Phase 2: process subdir1
+  create child frame for subdir1
+  sp = 2
+  stack = [root, subdir1]
+
+Pop subdir1 after processing all its children:
+  sp = 1
+  stack = [root]
+
+Continue with subdir2...
+================================================================================
+*/
+
+
