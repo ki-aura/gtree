@@ -30,7 +30,6 @@ void *xrealloc(void *ptr, size_t size) {
     void *new_ptr = realloc(ptr, size);
     if (new_ptr == NULL && size > 0) {
         fprintf(stderr, "Fatal: Out of memory (realloc %zu bytes).\n", size);
-        free(ptr);
         exit(EXIT_FAILURE);
     }
     return new_ptr;

@@ -1,7 +1,6 @@
-From Project Folder
-===================
 git tag --list
 grep  "GTREE_VERSION" gtree.h
+
 git add .
 git commit -m "ready for v2.3.2"
 git push
@@ -18,10 +17,3 @@ nano Formula/gtree.rb
 git add Formula/gtree.rb
 git commit -m "ready for v2.3.2"
 git push
-
-Test
-====
-brew update && brew install gtree
-gtree -h
-gtree /opt/homebrew/Library/Taps/ki-aura/homebrew-gtree/Formula/gtree.rb
-brew uninstall gtree
