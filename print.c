@@ -115,7 +115,6 @@ static void add_subfile(bool is_symlink, char *fname, SubDirFile **tail_ptr){
 	SubDirFile *n = xmalloc(sizeof(SubDirFile));
 	snprintf(n->name, PATH_MAX, "%s", fname);
 	n->is_symlink = is_symlink;
-	n->sym_path[0] = '\0';
 	n->prev = *tail_ptr;
 	*tail_ptr = n;
 }

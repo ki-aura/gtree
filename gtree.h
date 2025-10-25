@@ -31,7 +31,6 @@ typedef struct SubDirNode {
 typedef struct SubDirFile {
     char name[PATH_MAX];       // File Name 
     bool is_symlink;           // True if this file is a symbolic link
-    char sym_path[PATH_MAX];   // Target path if symlink (e.g., "../../otherdir")
     struct SubDirFile *prev;  // Pointer to previous file (linked list for children)
 } SubDirFile;
 
