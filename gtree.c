@@ -101,25 +101,10 @@ int main(int argc, char *argv[]) {
 
     // Parse command line options
     parse_options(argc, argv, &opts, MAX_DEPTH, &first_file_index);
-	fprintf(stderr, "ffi %d\n",first_file_index);
 	// Handle -v & -h options 
 	if (opts.show_version){show_version(); return EXIT_SUCCESS;}
 	if (opts.show_help){show_help(); return EXIT_SUCCESS;}
 
-    // Handle missing starting directory
-    if (first_file_index == - 1) {
-		fprintf(stderr, "No starting directory specified\n"); return EXIT_FAILURE;
-    }
-
-	// check directory is valid
-	DIR *valid_start = opendir(argv[first_file_index]);
-	if(valid_start == NULL){
-		fprintf(stderr, "Invalid starting directory specified\n"); return EXIT_FAILURE;
-	}
-	closedir(valid_start);
-	
-	// show version (helps with debugs!)
-	show_version();
     // Initialize all counters to 0
     ActivityReport final_report = {0};
 
@@ -127,15 +112,20 @@ int main(int argc, char *argv[]) {
     DirFrame *stack[MAX_DEPTH + 2];
     int sp = 0; // stack pointer: next free slot
 
+    // Create root frame & push onto stack. default to . if no directory specified
+    DirFrame *root = Create_Frame(first_file_index == - 1 ? "." : argv[first_file_index], 0, NULL, false);
+	if(!root){
+ 		fprintf(stderr, "Invalid starting directory specified\n"); 
+ 		return EXIT_FAILURE;
+	}
+
+    stack[sp++] = root;
+
     // Hash table to track visited directories to prevent infinite recursion via symlinks
     create_visited_node_hash();
 
-    // Create root frame & push onto stack
-    DirFrame *root = Create_Frame(argv[first_file_index], 0, NULL, false);
-    stack[sp++] = root;
-
     // Record root directory's unique device/inode ID in case symlinks loop back to it
-    struct stat st_root;
+    struct stat st_root;	
 	if (stat(root->path, &st_root) == 0) {
 		add_visited(st_root.st_dev, st_root.st_ino);
 	}
