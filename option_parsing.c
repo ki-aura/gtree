@@ -78,10 +78,11 @@ void show_version(void){
 
 // Print help message using the help_table
 void show_help(void){
-	fprintf(stderr, "Usage: fs [options] starting_directory \n");
+	fprintf(stderr, "Usage: gtree [options] starting_directory \n");
 	fprintf(stderr, "Options:\n");
 	for (HelpDef *opt = help_table; opt->name; opt++) {
 		fprintf(stderr, "  %s\t%s\n", opt->name, opt->help);
 	}
+	fprintf(stderr, "\nIf no starting directory is specified, current directory is assumed.\n");
 	show_version();
 }

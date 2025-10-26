@@ -10,7 +10,7 @@
 #define PATH_MAX 1024   
 #endif
 
-#define GTREE_VERSION "2.3.3"
+#define GTREE_VERSION "2.3.4"
 
 // -----------------------------------------------------
 // ------------------ Definitions ------------------
